@@ -1,10 +1,11 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
-	"net/http"
 	"grscan/api/models"
 	"grscan/pkg/check"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // CreateUser godoc
@@ -36,6 +37,27 @@ func (h Handler) CreateUser(c *gin.Context) {
 		return
 	}
 
+	// Check if login already exists
+	if exists, err := check.IsLoginExist(createUser.Login, h.storage.User()); err != nil {
+		handleResponse(c, "Error while checking login existence", http.StatusInternalServerError, err)
+		return
+	} else if exists {
+		handleResponse(c, "Login already exists", http.StatusBadRequest, "This login already exists") 
+		return
+	}
+
+	// Generate verification code
+	code := check.GenerateVerificationCode()
+
+	// Send verification code via SMS
+	if err := check.Send(createUser.Phone, "+998333346767", code); err != nil {
+		handleResponse(c, "Error while sending verification code", http.StatusInternalServerError, err)
+		return
+	}
+
+	// Save verification code to session or database for later verification
+
+	// Proceed with user registration
 	pKey, err := h.storage.User().Create(createUser)
 	if err != nil {
 		handleResponse(c, "Error while creating user", http.StatusInternalServerError, err)
