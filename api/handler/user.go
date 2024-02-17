@@ -3,6 +3,7 @@ package handler
 import (
 	"grscan/api/models"
 	"grscan/pkg/check"
+	"grscan/pkg/sms"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -32,12 +33,11 @@ func (h Handler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	if err := check.ValidatePassword(createUser.Password); err != nil {
-		handleResponse(c, "Invalid password", http.StatusBadRequest, err)
+	if !check.ValidatePassword(createUser.Password) {
+		handleResponse(c, "Invalid password", http.StatusBadRequest, nil)
 		return
 	}
 
-	// Check if login already exists
 	if exists, err := check.IsLoginExist(createUser.Login, h.storage.User()); err != nil {
 		handleResponse(c, "Error while checking login existence", http.StatusInternalServerError, err)
 		return
@@ -46,18 +46,14 @@ func (h Handler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	// Generate verification code
-	code := check.GenerateVerificationCode()
+	code := sms.GenerateVerificationCode()
 
-	// Send verification code via SMS
-	if err := check.Send(createUser.Phone, "+998333346767", code); err != nil {
+	if err := sms.Send(createUser.Phone, code); err != nil {
 		handleResponse(c, "Error while sending verification code", http.StatusInternalServerError, err)
 		return
 	}
 
-	// Save verification code to session or database for later verification
 
-	// Proceed with user registration
 	pKey, err := h.storage.User().Create(createUser)
 	if err != nil {
 		handleResponse(c, "Error while creating user", http.StatusInternalServerError, err)

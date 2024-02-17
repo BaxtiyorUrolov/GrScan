@@ -1,14 +1,9 @@
 package check
 
 import (
-	"errors"
 	"fmt"
 	"grscan/storage"
-	"math/rand"
-	"time"
 	"unicode"
-
-	"github.com/sfreiberg/gotwilio"
 )
 
 func PhoneNumber(phone string) bool {
@@ -22,11 +17,26 @@ func PhoneNumber(phone string) bool {
 	return true
 }
 
-func ValidatePassword(password string) error {
+func ValidatePassword(password string) bool {
 	if len(password) < 6 {
-		return errors.New("password length should be more than 6")
+		return false
 	}
-	return nil
+
+	var (
+		hasUpperCase bool
+		hasLowerCase bool
+	)
+
+	for _, char := range password {
+		if unicode.IsUpper(char) {
+			hasUpperCase = true
+		}
+		if unicode.IsLower(char) {
+			hasLowerCase = true
+		}
+	}
+
+	return hasUpperCase && hasLowerCase
 }
 
 func IsLoginExist(login string, userStorage storage.IUserStorage) (bool, error) {
@@ -35,27 +45,4 @@ func IsLoginExist(login string, userStorage storage.IUserStorage) (bool, error) 
 		return false, fmt.Errorf("error while checking login existence: %w", err)
 	}
 	return exists, nil
-}
-
-func GenerateVerificationCode() string {
-	rand.Seed(time.Now().UnixNano())
-	min := 100000
-	max := 999999
-	return fmt.Sprintf("%06d", rand.Intn(max-min+1)+min)
-}
-
-func Send(toNumber, fromNumber, code string) error {
-	accountSid := "YOUR_TWILIO_ACCOUNT_SID"
-	authToken := "YOUR_TWILIO_AUTH_TOKEN"
-
-	twilio := gotwilio.NewTwilioClient(accountSid, authToken)
-
-	message := fmt.Sprintf("Your verification code is: %s", code)
-
-	_, _, err := twilio.SendSMS(fromNumber, toNumber, message, "", "")
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

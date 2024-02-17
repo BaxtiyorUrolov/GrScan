@@ -11,6 +11,6 @@ CREATE TABLE users (
     key UUID UNIQUE,
     user_type user_type_enum NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(),
-    deleted_at TIMESTAMP DEFAULT NULL
+    updated_at TIMESTAMP,
+    deleted_at INTEGER DEFAULT 0
 );
