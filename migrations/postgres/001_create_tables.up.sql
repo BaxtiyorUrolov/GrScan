@@ -1,6 +1,6 @@
 CREATE TYPE user_type_enum AS ENUM ('admin', 'customer', 'partner');
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,
     user_id SERIAL,
     phone VARCHAR(15) UNIQUE,

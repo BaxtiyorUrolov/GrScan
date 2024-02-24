@@ -2,25 +2,31 @@ package main
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"grscan/api"
 	"grscan/config"
+	"grscan/pkg/logger"
+	"grscan/service"
 	"grscan/storage/postgres"
 )
 
 func main() {
+
 	cfg := config.Load()
 
-	pgStore, err := postgres.New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+
+	store, err := postgres.New(context.Background(), cfg, log)
 	if err != nil {
-		log.Fatalln("error while connecting to db err:", err.Error())
-		return
+		log.Error("error while connecting to db: %v", logger.Error(err))
 	}
-	defer pgStore.Close()
+	defer store.Close()
 
-	server := api.New(pgStore)
+	services := service.New(store, log)
 
-	if err = server.Run("localhost:8080"); err != nil {
-		panic(err)
+	server := api.New(services, log)
+
+	if err := server.Run("localhost:8080"); err != nil {
+		fmt.Printf("error while running server: %v\n", err)
 	}
 }

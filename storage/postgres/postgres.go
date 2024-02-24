@@ -3,27 +3,38 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/golang-migrate/migrate/v4"
+	"strings"
 	"grscan/config"
+	"grscan/pkg/logger"
 	"grscan/storage"
+	"github.com/jackc/pgx/v5/pgxpool"
 
+	_ "github.com/golang-migrate/migrate/v4/database"          //database is needed for migration
+	_ "github.com/golang-migrate/migrate/v4/database/postgres" //postgres is used for database
+	_ "github.com/golang-migrate/migrate/v4/source/file"       //file is needed for migration url
 	_ "github.com/lib/pq"
 )
 
 type Store struct {
-	Pool *pgxpool.Pool
+	pool  *pgxpool.Pool
+	log   logger.ILogger
+	cfg   config.Config
 }
 
-func New(ctx context.Context, cfg config.Config) (storage.IStorage, error) {
-	poolConfig, err := pgxpool.ParseConfig(fmt.Sprintf(
+func New(ctx context.Context, cfg config.Config, log logger.ILogger) (storage.IStorage, error) {
+	url := fmt.Sprintf(
 		`postgres://%s:%s@%s:%s/%s?sslmode=disable`,
 		cfg.PostgresUser,
 		cfg.PostgresPassword,
 		cfg.PostgresHost,
 		cfg.PostgresPort,
-		cfg.PostgresDB))
+		cfg.PostgresDB,
+	)
+
+	poolConfig, err := pgxpool.ParseConfig(url)
 	if err != nil {
-		fmt.Println("error while parsing config", err.Error())
+		log.Error("error while parsing config", logger.Error(err))
 		return nil, err
 	}
 
@@ -31,19 +42,55 @@ func New(ctx context.Context, cfg config.Config) (storage.IStorage, error) {
 
 	pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {
-		fmt.Println("error while connecting to db", err.Error())
+		log.Error("error while connecting to db", logger.Error(err))
 		return nil, err
 	}
 
+	//migration
+	m, err := migrate.New("file://migrations/postgres/", url)
+	if err != nil {
+		log.Error("error while migrating", logger.Error(err))
+		return nil, err
+	}
+
+	log.Info("???? came")
+
+	if err = m.Up(); err != nil {
+		log.Warning("migration up", logger.Error(err))
+		if !strings.Contains(err.Error(), "no change") {
+			fmt.Println("entered")
+			version, dirty, err := m.Version()
+			log.Info("version and dirty", logger.Any("version", version), logger.Any("dirty", dirty))
+			if err != nil {
+				log.Error("err in checking version and dirty", logger.Error(err))
+				return nil, err
+			}
+
+			if dirty {
+				version--
+				if err = m.Force(int(version)); err != nil {
+					log.Error("ERR in making force", logger.Error(err))
+					return nil, err
+				}
+			}
+			log.Warning("WARNING in migrating", logger.Error(err))
+			return nil, err
+		}
+	}
+
+	log.Info("!!!!! came here")
+
 	return Store{
-		Pool: pool,
+		pool:  pool,
+		log:   log,
+		cfg:   cfg,
 	}, nil
 }
 
 func (s Store) Close() {
-	s.Pool.Close()
+	s.pool.Close()
 }
 
 func (s Store) User() storage.IUserStorage {
-	return NewUserRepo(s.Pool)
+	return NewUserRepo(s.pool, s.log)
 }

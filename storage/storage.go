@@ -1,6 +1,9 @@
 package storage
 
-import "grscan/api/models"
+import (
+	"context"
+	"grscan/api/models"
+)
 
 type IStorage interface {
 	Close()
@@ -8,8 +11,8 @@ type IStorage interface {
 }
 
 type IUserStorage interface {
-	Create(models.CreateUser) (string, error)
-	GetByID(models.PrimaryKey) (models.User, error)
+	Create(context.Context, models.CreateUser) (string, error)
+	GetByID(context.Context, models.PrimaryKey) (models.User, error)
 	IsLoginExist(login string) (bool, error)
 }
 

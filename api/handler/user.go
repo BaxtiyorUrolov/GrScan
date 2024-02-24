@@ -1,9 +1,8 @@
 package handler
 
 import (
+	"context"
 	"grscan/api/models"
-	"grscan/pkg/check"
-	"grscan/pkg/sms"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -24,41 +23,15 @@ import (
 func (h Handler) CreateUser(c *gin.Context) {
 	createUser := models.CreateUser{}
 	if err := c.ShouldBindJSON(&createUser); err != nil {
-		handleResponse(c, "Error while reading body from client", http.StatusBadRequest, err)
+		handleResponse(c, h.log, "Error while reading body from client", http.StatusBadRequest, err)
 		return
 	}
 
-	if !check.PhoneNumber(createUser.Phone) {
-		handleResponse(c, "Incorrect phone number", http.StatusBadRequest, nil)
-		return
-	}
-
-	if !check.ValidatePassword(createUser.Password) {
-		handleResponse(c, "Invalid password", http.StatusBadRequest, nil)
-		return
-	}
-
-	if exists, err := check.IsLoginExist(createUser.Login, h.storage.User()); err != nil {
-		handleResponse(c, "Error while checking login existence", http.StatusInternalServerError, err)
-		return
-	} else if exists {
-		handleResponse(c, "Login already exists", http.StatusBadRequest, "This login already exists") 
-		return
-	}
-
-	code := sms.GenerateVerificationCode()
-
-	if err := sms.Send(createUser.Phone, code); err != nil {
-		handleResponse(c, "Error while sending verification code", http.StatusInternalServerError, err)
-		return
-	}
-
-
-	pKey, err := h.storage.User().Create(createUser)
+	resp, err := h.services.User().Create(context.Background(), createUser)
 	if err != nil {
-		handleResponse(c, "Error while creating user", http.StatusInternalServerError, err)
+		handleResponse(c, h.log, "error is while creating category", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponse(c, "User created successfully", http.StatusCreated, pKey)
+	handleResponse(c, h.log, "", http.StatusCreated, resp)
 }
