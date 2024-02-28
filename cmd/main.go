@@ -24,7 +24,7 @@ func main() {
 
 	services := service.New(store, log)
 
-	server := api.New(services, log)
+	server := api.New(services, store, log)
 
 	if err := server.Run("localhost:8080"); err != nil {
 		fmt.Printf("error while running server: %v\n", err)

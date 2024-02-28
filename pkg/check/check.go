@@ -1,6 +1,7 @@
 package check
 
 import (
+	"context"
 	"fmt"
 	"grscan/storage"
 	"unicode"
@@ -40,7 +41,7 @@ func ValidatePassword(password string) bool {
 }
 
 func IsLoginExist(login string, userStorage storage.IUserStorage) (bool, error) {
-	exists, err := userStorage.IsLoginExist(login)
+	exists, err := userStorage.IsLoginExist(context.Background(), login)
 	if err != nil {
 		return false, fmt.Errorf("error while checking login existence: %w", err)
 	}

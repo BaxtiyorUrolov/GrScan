@@ -12,19 +12,19 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type UserRepo struct {
+type userRepo struct {
 	db *pgxpool.Pool
 	log logger.ILogger
 }
 
 func NewUserRepo(db *pgxpool.Pool, log logger.ILogger) storage.IUserStorage {
-	return &UserRepo{
+	return &userRepo{
 		db: db,
 		log: log,
 	}
 }
 
-func (u *UserRepo) Create(ctx context.Context, createUser models.CreateUser) (string, error) {
+func (u *userRepo) Create(ctx context.Context, createUser models.CreateUser) (string, error) {
 	uid := uuid.New()
 	createdAt := time.Now().Format("2006-01-02 15:04:05")
 
@@ -46,7 +46,7 @@ func (u *UserRepo) Create(ctx context.Context, createUser models.CreateUser) (st
 	return uid.String(), nil
 }
 
-func (u *UserRepo) GetByID(ctx context.Context, pKey models.PrimaryKey) (models.User, error) {
+func (u *userRepo) GetByID(ctx context.Context, pKey models.PrimaryKey) (models.User, error) {
 	user := models.User{}
 
 	query := `
@@ -65,9 +65,9 @@ func (u *UserRepo) GetByID(ctx context.Context, pKey models.PrimaryKey) (models.
 	return user, nil
 }
 
-func (u *UserRepo) IsLoginExist(login string) (bool, error) {
+func (u *userRepo) IsLoginExist(ctx context.Context, login string) (bool, error) {
 	var exists bool
-	err := u.db.QueryRow(context.Background(), `
+	err := u.db.QueryRow(ctx, `
 		SELECT EXISTS (SELECT 1 FROM users WHERE login = $1)
 	`, login).Scan(&exists)
 	if err != nil {
@@ -76,4 +76,18 @@ func (u *UserRepo) IsLoginExist(login string) (bool, error) {
 	}
 
 	return exists, nil
+}
+
+func (u *userRepo) GetPasswordByLogin(ctx context.Context, login string) (string, error) {
+	password := ""
+
+	query := `SELECT password FROM users
+						  	where login = $1` 
+
+	if err := u.db.QueryRow(ctx, query, login).Scan(&password); err != nil {
+		fmt.Println("Error while scanning password from users", err.Error())
+		return "", err
+	}
+
+	return password, nil
 }

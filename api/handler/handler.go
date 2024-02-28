@@ -1,20 +1,24 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
 	"grscan/api/models"
 	"grscan/pkg/logger"
 	"grscan/service"
+	"grscan/storage"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
 	services service.IServiceManager
+	storage  storage.IStorage
 	log      logger.ILogger
 }
 
-func New(services service.IServiceManager, log logger.ILogger) Handler {
+func New(services service.IServiceManager, storage storage.IStorage, log logger.ILogger) Handler {
 	return Handler{
 		services: services,
+		storage:  storage,
 		log:      log,
 	}
 }

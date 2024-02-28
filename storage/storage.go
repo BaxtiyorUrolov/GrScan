@@ -13,7 +13,8 @@ type IStorage interface {
 type IUserStorage interface {
 	Create(context.Context, models.CreateUser) (string, error)
 	GetByID(context.Context, models.PrimaryKey) (models.User, error)
-	IsLoginExist(login string) (bool, error)
+	IsLoginExist(context.Context, string) (bool, error)
+	GetPasswordByLogin(context.Context, string) (string, error)
 }
 
 
