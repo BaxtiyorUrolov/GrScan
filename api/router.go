@@ -24,11 +24,10 @@ func New(services service.IServiceManager, storage storage.IStorage, log logger.
 	r.POST("/auth/customer/login", h.CustomerLogin)
 
 	r.POST("/user", h.CreateUser)
-	// r.GET("/user/:id", h.Getuser)
-	// r.GET("/users", h.GetuserList)
-	// r.PUT("/user/:id", h.Updateuser)
-	// r.DELETE("/user/:id", h.Deleteuser)
-	// r.PATCH("/user/:id", h.UpdatePageNumber)
+	
+	// verify register
+
+	r.POST("/verify-register", h.VerifyRegister)
 
 	// Swagger documentation route
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

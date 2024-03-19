@@ -1,4 +1,11 @@
 definitions:
+  models.CreateRegister:
+    properties:
+      code:
+        type: string
+      phone:
+        type: string
+    type: object
   models.CreateUser:
     properties:
       login:
@@ -15,6 +22,17 @@ definitions:
       login:
         type: string
       password:
+        type: string
+    type: object
+  models.Register:
+    properties:
+      code:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      phone:
         type: string
     type: object
   models.Response:
@@ -121,4 +139,37 @@ paths:
       summary: Creates a new user
       tags:
       - user
+  /verify-register:
+    post:
+      consumes:
+      - application/json
+      description: create a new verify register
+      parameters:
+      - description: verify
+        in: body
+        name: verify
+        schema:
+          $ref: '#/definitions/models.CreateRegister'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Register'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Creates a new verify register
+      tags:
+      - verify register
 swagger: "2.0"

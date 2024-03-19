@@ -8,6 +8,7 @@ import (
 type IStorage interface {
 	Close()
 	User() IUserStorage
+	Register() IRegisterStorage
 }
 
 type IUserStorage interface {
@@ -18,3 +19,8 @@ type IUserStorage interface {
 }
 
 
+type IRegisterStorage interface {
+	Create(context.Context, models.CreateRegister) error
+	GetByID(context.Context, string) (models.Register, error)
+	UpdateStatus(context.Context, string) error
+}

@@ -35,16 +35,15 @@ func GenerateJWT(m map[string]interface{}) (string, string, error) {
 	return accessTokenStr, refreshTokenSTR, nil
 }
 
-func ExtractClaims(tokenString string) error {
+func ExtractClaims(tokenString string) (map[interface{}]interface{}, error) {
 	m := make(map[interface{}]interface{})
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		 
 		return token.SignedString(config.SignKey)
 	})
 	if err != nil {
 		fmt.Println("Error: ", err)
-		return err
+		return nil, err
 	}
 
 	value, ok := token.Claims.(jwt.MapClaims)["key"]
@@ -52,5 +51,5 @@ func ExtractClaims(tokenString string) error {
 		m["user_id"] = value
 	}
 
-	return nil
+	return m, nil
 }

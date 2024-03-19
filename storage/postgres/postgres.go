@@ -94,3 +94,7 @@ func (s Store) Close() {
 func (s Store) User() storage.IUserStorage {
 	return NewUserRepo(s.pool, s.log)
 }
+
+func (s Store) Register() storage.IRegisterStorage {
+	return NewRegisterRepo(s.pool, s.log)
+}

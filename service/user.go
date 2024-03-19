@@ -40,6 +40,15 @@ func (u userService) Create(ctx context.Context, createUser models.CreateUser) (
 		return models.User{}, err
 	}
 
+	err = u.storage.Register().Create(ctx, models.CreateRegister{
+		Phone: createUser.Phone,
+		Code: code,
+	})
+	if err != nil {
+		u.log.Error("ERROR in service layer while creating category", logger.Error(err))
+		return models.User{}, err
+	}
+
 	pKey, err := u.storage.User().Create(context.Background(), createUser)
 	if err != nil {
 		u.log.Error("Error while creating user", logger.Error(err))
