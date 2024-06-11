@@ -20,6 +20,7 @@ func GenerateVerificationCode() string {
 }
 
 func Send(toNumber, code string) error {
+	fmt.Println("Code: ", code)
 	fromNumber := "4546"
 	apiURL := "https://notify.eskiz.uz/api/message/sms/send"
 
@@ -27,7 +28,7 @@ func Send(toNumber, code string) error {
 
 	smsData := models.SMS{
 		MobilePhone: toNumber,        
-		Message:     fmt.Sprintf("Sizning tasdiqlash kodingiz: %s", code), 
+		Message:     "This is test from Eskiz",
 		From:        fromNumber,           
 	}
 

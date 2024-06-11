@@ -1,12 +1,5 @@
 definitions:
-  models.CreateRegister:
-    properties:
-      code:
-        type: string
-      phone:
-        type: string
-    type: object
-  models.CreateUser:
+  models.CreateUserRequest:
     properties:
       login:
         type: string
@@ -22,17 +15,6 @@ definitions:
       login:
         type: string
       password:
-        type: string
-    type: object
-  models.Register:
-    properties:
-      code:
-        type: string
-      created_at:
-        type: string
-      id:
-        type: string
-      phone:
         type: string
     type: object
   models.Response:
@@ -68,6 +50,17 @@ definitions:
       user_id:
         type: integer
       user_type:
+        type: string
+    type: object
+  models.VerifyCodeRequest:
+    properties:
+      code:
+        type: string
+      login:
+        type: string
+      password:
+        type: string
+      phone:
         type: string
     type: object
 info:
@@ -116,7 +109,7 @@ paths:
         in: body
         name: user
         schema:
-          $ref: '#/definitions/models.CreateUser'
+          $ref: '#/definitions/models.CreateUserRequest'
       produces:
       - application/json
       responses:
@@ -143,20 +136,20 @@ paths:
     post:
       consumes:
       - application/json
-      description: create a new verify register
+      description: verify the SMS code sent to user
       parameters:
-      - description: verify
+      - description: verification
         in: body
-        name: verify
+        name: verification
         schema:
-          $ref: '#/definitions/models.CreateRegister'
+          $ref: '#/definitions/models.VerifyCodeRequest'
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
-            $ref: '#/definitions/models.Register'
+            $ref: '#/definitions/models.User'
         "400":
           description: Bad Request
           schema:
@@ -169,7 +162,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.Response'
-      summary: Creates a new verify register
+      summary: Verifies the SMS code
       tags:
-      - verify register
+      - user
 swagger: "2.0"

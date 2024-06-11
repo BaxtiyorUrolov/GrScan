@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #cccccc;
+        }
+        .message {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>User Registration</h1>
+        <div class="form-group">
+            <label for="phone">Phone:</label>
+            <input type="text" id="phone">
+        </div>
+        <div class="form-group">
+            <label for="login">Login:</label>
+            <input type="text" id="login">
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password">
+        </div>
+        <div class="form-group">
+            <label for="userType">User Type:</label>
+            <input type="text" id="userType">
+        </div>
+        <button id="registerButton">Register</button>
+
+        <div id="verifySection" style="display: none;">
+            <h2>Verify Code</h2>
+            <div class="form-group">
+                <label for="verifyPhone">Phone:</label>
+                <input type="text" id="verifyPhone" readonly>
+            </div>
+            <div class="form-group">
+                <label for="verifyCode">Verification Code:</label>
+                <input type="text" id="verifyCode">
+            </div>
+            <button id="verifyButton">Verify</button>
+        </div>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <script>
+        document.getElementById('registerButton').addEventListener('click', function() {
+            var phone = document.getElementById('phone').value;
+            var login = document.getElementById('login').value;
+            var password = document.getElementById('password').value;
+            var userType = document.getElementById('userType').value;
+
+            fetch('/user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    phone: phone,
+                    login: login,
+                    password: password,
+                    user_type: userType
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('message').textContent = data.message;
+                if (data.phone) {
+                    document.getElementById('verifyPhone').value = data.phone;
+                    document.getElementById('verifySection').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                document.getElementById('message').textContent = 'Error: ' + error.message;
+                console.error('Error:', error);
+            });
+        });
+
+        document.getElementById('verifyButton').addEventListener('click', function() {
+            var phone = document.getElementById('verifyPhone').value;
+            var code = document.getElementById('verifyCode').value;
+
+            fetch('/verify-register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    phone: phone,
+                    code: code
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('message').textContent = data.message;
+                if (data.message === "User created successfully") {
+                    document.getElementById('verifySection').style.display = 'none';
+                }
+            })
+            .catch(error => {
+                document.getElementById('message').textContent = 'Error: ' + error.message;
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

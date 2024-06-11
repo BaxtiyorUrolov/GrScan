@@ -24,9 +24,6 @@ func New(services service.IServiceManager, storage storage.IStorage, log logger.
 	r.POST("/auth/customer/login", h.CustomerLogin)
 
 	r.POST("/user", h.CreateUser)
-	
-	// verify register
-
 	r.POST("/verify-register", h.VerifyRegister)
 
 	// Swagger documentation route

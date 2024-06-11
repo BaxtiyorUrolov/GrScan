@@ -8,6 +8,8 @@ import (
 	"grscan/pkg/logger"
 	"grscan/service"
 	"grscan/storage/postgres"
+	"net/http"
+
 )
 
 func main() {
@@ -25,6 +27,10 @@ func main() {
 	services := service.New(store, log)
 
 	server := api.New(services, store, log)
+
+	// Statik fayllarni xizmat qilish
+	server.StaticFS("/static", http.Dir("./static"))
+	server.StaticFile("/", "./static/index.html")
 
 	if err := server.Run("localhost:8080"); err != nil {
 		fmt.Printf("error while running server: %v\n", err)

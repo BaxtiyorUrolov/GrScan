@@ -85,7 +85,7 @@ const docTemplate = `{
                         "name": "user",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/models.CreateUser"
+                            "$ref": "#/definitions/models.CreateUserRequest"
                         }
                     }
                 ],
@@ -119,7 +119,7 @@ const docTemplate = `{
         },
         "/verify-register": {
             "post": {
-                "description": "create a new verify register",
+                "description": "verify the SMS code sent to user",
                 "consumes": [
                     "application/json"
                 ],
@@ -127,24 +127,24 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "verify register"
+                    "user"
                 ],
-                "summary": "Creates a new verify register",
+                "summary": "Verifies the SMS code",
                 "parameters": [
                     {
-                        "description": "verify",
-                        "name": "verify",
+                        "description": "verification",
+                        "name": "verification",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/models.CreateRegister"
+                            "$ref": "#/definitions/models.VerifyCodeRequest"
                         }
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Register"
+                            "$ref": "#/definitions/models.User"
                         }
                     },
                     "400": {
@@ -170,18 +170,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.CreateRegister": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.CreateUser": {
+        "models.CreateUserRequest": {
             "type": "object",
             "properties": {
                 "login": {
@@ -205,23 +194,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.Register": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "phone": {
                     "type": "string"
                 }
             }
@@ -275,6 +247,23 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "user_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.VerifyCodeRequest": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone": {
                     "type": "string"
                 }
             }

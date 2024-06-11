@@ -74,7 +74,7 @@
                         "name": "user",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/models.CreateUser"
+                            "$ref": "#/definitions/models.CreateUserRequest"
                         }
                     }
                 ],
@@ -108,7 +108,7 @@
         },
         "/verify-register": {
             "post": {
-                "description": "create a new verify register",
+                "description": "verify the SMS code sent to user",
                 "consumes": [
                     "application/json"
                 ],
@@ -116,24 +116,24 @@
                     "application/json"
                 ],
                 "tags": [
-                    "verify register"
+                    "user"
                 ],
-                "summary": "Creates a new verify register",
+                "summary": "Verifies the SMS code",
                 "parameters": [
                     {
-                        "description": "verify",
-                        "name": "verify",
+                        "description": "verification",
+                        "name": "verification",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/models.CreateRegister"
+                            "$ref": "#/definitions/models.VerifyCodeRequest"
                         }
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Register"
+                            "$ref": "#/definitions/models.User"
                         }
                     },
                     "400": {
@@ -159,18 +159,7 @@
         }
     },
     "definitions": {
-        "models.CreateRegister": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "phone": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.CreateUser": {
+        "models.CreateUserRequest": {
             "type": "object",
             "properties": {
                 "login": {
@@ -194,23 +183,6 @@
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.Register": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "phone": {
                     "type": "string"
                 }
             }
@@ -264,6 +236,23 @@
                     "type": "integer"
                 },
                 "user_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.VerifyCodeRequest": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone": {
                     "type": "string"
                 }
             }
